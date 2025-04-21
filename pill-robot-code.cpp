@@ -108,6 +108,7 @@ void stopD()
 void slowD(float Kp)
 {
     motor[motorA] = motor[motorD] = Kp*(getUSDistance(S1) - 25);
+    while (getUSDistance(S1) > 25){}
 }
 
 // turns left
@@ -348,6 +349,7 @@ task main()
 	int pillCounts[MAX];
 	int scheduleSize = 0;
 	int scheduleIndex = 0;
+	float person = false;
 
 
 	float distTurn[NUMTURN];
@@ -378,12 +380,12 @@ task main()
 		{}
 
 		// drive up to user
-		while (getIRBeaconStrength(S2) < 15 && SensorValue[S4] != 1)
+		while (getIRBeaconStrength(S2) < 15)
 		{
 			displayString(5, " %f", getIRBeaconStrength(S2));
 		}
 
-		while (getIRBeaconStrength(S2) > 15)
+		while (getIRBeaconStrength(S2) > 15 || person == false)
 		{
 			displayString(5, " %f", getIRBeaconStrength(S2));
 			displayString(6, " %f", getIRBeaconStrength(S2));
@@ -391,18 +393,17 @@ task main()
 			stopD();
 			driveforward();
 
-			while (getUSDistance(S1) > 30)
+			while (getUSDistance(S1) > 40)
 			{}
 
 		//	displayString(9, "Exited getUSDistance(S1) > 30");
 
-			slowD(0.15);
+			slowD(2);
 			stopD();
 
 			displayString(11, "%f", getIRBeaconStrength(S2));
 			wait1Msec(500);
 			displayString(12, "%f", getIRBeaconStrength(S2));
-
 
 			if (getIRBeaconStrength(S2) > 15)
 			{
@@ -412,7 +413,15 @@ task main()
 			else
 			{
 				time1[T4] = 0;
-				while (time1[T1] < 5000 && SensorValue[S4] != 1){}
+				while (time1[T4] < 5000 && SensorValue[S4] != 1){}
+				if (SensorValue[S4] != 1)
+				{
+					colDec(distTurn, turnAngles, pathCount);
+				}
+				else
+				{
+					person = true;
+				}
 			}
 
 			stopD();
